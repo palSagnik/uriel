@@ -178,7 +178,7 @@ These routes allow for the management and retrieval of POIs. Administrative or G
 
 1.  **Create POI**
 
-      * **Endpoint:** `/api/v1/pois`
+      * **Endpoint:** `/api/v1/pois/create`
       * **Method:** `POST`
       * **Purpose:** Adds a new Point of Interest to the game world.
       * **Authentication:** Required (JWT). **Authorization:** Must have `admin` or `game_master` role.
@@ -362,7 +362,7 @@ This is not a traditional REST endpoint but the entry point for WebSocket connec
             "poi_type": "resource_node"
         }
         ```
-      * **Messages Sent by Client (Optional):** Clients could send messages to request specific updates or indicate their current viewport for optimized data推送.
+      * **Messages Sent by Client (Optional):** Clients could send messages to request specific updates or indicate their current viewport for optimized data.
         ```json
         {
             "type": "viewport_update",
