@@ -17,20 +17,35 @@ type mongoAuthRepository struct {
 }
 
 func NewMongoAuthRepository(client *mongo.Client) auth.AuthRepository {
+	var err error
 	playerCollection := client.Database("uriel").Collection("player")
 
-	// ensuring the index on username for efficient login and preventing duplicates
+	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{{Key: "username", Value: "1"}},
+	// USERNAME (INDEX)
+	usernameIndexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "username", Value: "1"}},
 		Options: options.Index().SetUnique(true),
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+
+	// EMAIL (INDEX)
+	emailIndexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "email", Value: "1"}},
+		Options: options.Index().SetUnique(true),
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := playerCollection.Indexes().CreateOne(ctx, indexModel)
+	// creating index on username
+	_, err = playerCollection.Indexes().CreateOne(ctx, usernameIndexModel)
 	if err != nil {
 		log.Printf("Warning: The unique index on username could not be created: %v", err)
+	}
+
+	// creating index on email
+	_, err = playerCollection.Indexes().CreateOne(ctx, emailIndexModel)
+	if err != nil {
+		log.Printf("Warning: The unique index on email could not be created: %v", err)
 	}
 	return &mongoAuthRepository{collection: playerCollection}
 }
@@ -64,7 +79,21 @@ func (repo *mongoAuthRepository) GetPlayerById(ctx context.Context, id string) (
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
-		return nil, err 
+		return nil, err
+	}
+	return &player, nil
+}
+
+func (repo *mongoAuthRepository) GetPlayerByEmail(ctx context.Context, email string) (*models.Player, error) {
+	var player models.Player
+
+	filter := bson.M{"email": email}
+	err := repo.collection.FindOne(ctx, filter).Decode(&player)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
 	}
 	return &player, nil
 }
