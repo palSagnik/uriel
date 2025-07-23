@@ -5,9 +5,11 @@ import (
 )
 
 
-func SetupAuthRoutes(router *gin.RouterGroup, handler *Handler) {
+func RegisterRoutes(router *gin.RouterGroup, handler *Handler) {
 	auth := router.Group("/auth")
-
-	auth.POST("/register", handler.RegisterPlayer)
+	{
+		auth.POST("/register", handler.RegisterPlayer)
+	}
+	
 }
 

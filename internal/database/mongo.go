@@ -8,27 +8,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type DB struct {
-	database *mongo.Database
-}
+func NewMongoClient(uri string) (*mongo.Client, error) {
 
-func Connect() (*DB, error) {
-
-	// Connect to the database.
-    clientOptions := options.Client().ApplyURI(config.MONGO_DB_URI)
+    clientOptions := options.Client().ApplyURI(uri)
     client, err := mongo.Connect(context.Background(), clientOptions)
     if err != nil {
         return nil, err
     }
     db := client.Database(config.DATABASE_NAME)
 
-   return &DB{database: db}, nil
+   return db.Client(), nil
 }
 
-func (db *DB) Ping() error {
-    if err := db.database.Client().Ping(context.Background(), nil); err != nil {
-		return err
-	}
+// func (db *DB) Ping() error {
+//     if err := db.database.Client().Ping(context.Background(), nil); err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
