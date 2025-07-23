@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/palSagnik/uriel/internal/auth"
+	"github.com/palSagnik/uriel/internal/config"
 	"github.com/palSagnik/uriel/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,7 +19,8 @@ type mongoAuthRepository struct {
 
 func NewMongoAuthRepository(client *mongo.Client) auth.AuthRepository {
 	var err error
-	playerCollection := client.Database("uriel").Collection("player")
+
+	playerCollection := client.Database(config.DATABASE_NAME).Collection(config.PLAYER_COLLECTION)
 
 	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
