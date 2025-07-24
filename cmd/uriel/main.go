@@ -3,20 +3,40 @@ package main
 import (
 	"log"
 
+	"github.com/gin-gonic/gin"
+	"github.com/palSagnik/uriel/internal/auth"
+	"github.com/palSagnik/uriel/internal/config"
 	"github.com/palSagnik/uriel/internal/database"
 )
 
 
 func main() {
 
-	// connect to database
-	db, err := database.Connect()
+	// Loading config
+	cfg := config.LoadConfig()
+
+	mongodb, err := database.NewMongoClient(cfg.MongoDBURI)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to mongo: %v", err)
 	}
 
-	if err := db.Ping(); err != nil {
-		log.Fatalf("database is not live: %v", err)
+	router := gin.Default()
+	router.Use(gin.Logger(), gin.Recovery())
+
+	// --- Initialise Repositories ---
+	authRepo := database.NewMongoAuthRepository(mongodb)
+
+	// --- Initialise Services ---
+	authService := auth.NewService(authRepo)
+
+	// --- Initialise Handlers ---
+	authHandler := auth.NewHandler(authService)
+
+	v1 := router.Group("/api/v1")
+	{
+		auth.RegisterRoutes(v1, authHandler)
 	}
-	log.Println("connected to database")
+
+	// --- Running the server ---
+	router.Run(cfg.ServerPort)
 }

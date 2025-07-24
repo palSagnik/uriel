@@ -17,22 +17,22 @@ type mongoAuthRepository struct {
 	collection *mongo.Collection
 }
 
-func NewMongoAuthRepository(client *mongo.Client) auth.AuthRepository {
+func NewMongoAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	var err error
 
-	playerCollection := client.Database(config.DATABASE_NAME).Collection(config.PLAYER_COLLECTION)
+	playerCollection := mongodb.GetCollection(config.PLAYER_COLLECTION)
 
 	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
 	// USERNAME (INDEX)
 	usernameIndexModel := mongo.IndexModel{
-		Keys:    bson.D{{Key: "username", Value: "1"}},
+		Keys:    bson.D{{Key: "username", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
 
 	// EMAIL (INDEX)
 	emailIndexModel := mongo.IndexModel{
-		Keys:    bson.D{{Key: "email", Value: "1"}},
+		Keys:    bson.D{{Key: "email", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

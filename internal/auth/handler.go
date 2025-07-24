@@ -27,7 +27,7 @@ func (h *Handler) RegisterPlayer(c *gin.Context) {
 		return
 	}
 
-	if req.Password != req.ConfirmPassword {
+	if req.Password != req.Confirm {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "password and confirm password fields do not match"})
 		return
 	}

@@ -1,10 +1,10 @@
 package models
 
 type RegisterRequest struct {
-	Email           string
-	Username        string
-	Password        string
-	ConfirmPassword string
+	Email    string `json:"email"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Confirm  string `json:"confirm"`
 }
 
 type Credentials struct {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/palSagnik/uriel/internal/config"
 	"github.com/palSagnik/uriel/internal/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -50,6 +51,7 @@ func (s *Service) RegisterPlayerService(ctx context.Context, req *models.Registe
 	// create player
 	// TODO: Errors should be ENUMS
 	newPlayer := models.Player{
+		ID: primitive.NewObjectID(),
 		Username: req.Username,
 		Email: req.Email,
 		Password: string(hashedPassword),
