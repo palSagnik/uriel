@@ -11,7 +11,11 @@ import (
 
 
 func main() {
-	mongoClient, err := database.NewMongoClient(config.MONGO_DB_URI)
+
+	// Loading config
+	cfg := config.LoadConfig()
+
+	mongodb, err := database.NewMongoClient(cfg.MongoDBURI)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -19,7 +23,7 @@ func main() {
 	router := gin.Default()
 
 	// --- Initialise Repositories ---
-	authRepo := database.NewMongoAuthRepository(mongoClient)
+	authRepo := database.NewMongoAuthRepository(mongodb.Client)
 
 	// --- Initialise Services ---
 	authService := auth.NewService(authRepo)

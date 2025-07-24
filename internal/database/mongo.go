@@ -8,7 +8,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewMongoClient(uri string) (*mongo.Client, error) {
+type MongoDB struct {
+    Client *mongo.Client
+}
+
+func NewMongoClient(uri string) (*MongoDB, error) {
 
     clientOptions := options.Client().ApplyURI(uri)
     client, err := mongo.Connect(context.Background(), clientOptions)
@@ -17,7 +21,7 @@ func NewMongoClient(uri string) (*mongo.Client, error) {
     }
     db := client.Database(config.DATABASE_NAME)
 
-   return db.Client(), nil
+   return &MongoDB{Client: db.Client()}, nil
 }
 
 // func (db *DB) Ping() error {
