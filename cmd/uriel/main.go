@@ -23,7 +23,7 @@ func main() {
 	router := gin.Default()
 
 	// --- Initialise Repositories ---
-	authRepo := database.NewMongoAuthRepository(mongodb.Client)
+	authRepo := database.NewMongoAuthRepository(mongodb)
 
 	// --- Initialise Services ---
 	authService := auth.NewService(authRepo)

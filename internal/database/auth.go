@@ -17,10 +17,10 @@ type mongoAuthRepository struct {
 	collection *mongo.Collection
 }
 
-func NewMongoAuthRepository(client *mongo.Client) auth.AuthRepository {
+func NewMongoAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	var err error
 
-	playerCollection := client.Database(config.DATABASE_NAME).Collection(config.PLAYER_COLLECTION)
+	playerCollection := mongodb.GetCollection(config.PLAYER_COLLECTION)
 
 	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
