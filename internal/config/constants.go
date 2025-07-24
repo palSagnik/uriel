@@ -6,5 +6,5 @@ const ADMIN = "admin"
 const GUEST = "guest"
 
 // DATABASE
-const DATABASE_NAME = "uriel"
+const DATABASE_NAME = "urieldb"
 const PLAYER_COLLECTION = "player"

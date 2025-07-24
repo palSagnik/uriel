@@ -26,13 +26,13 @@ func NewMongoAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	// this helps in data integrity
 	// USERNAME (INDEX)
 	usernameIndexModel := mongo.IndexModel{
-		Keys:    bson.D{{Key: "username", Value: "1"}},
+		Keys:    bson.D{{Key: "username", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
 
 	// EMAIL (INDEX)
 	emailIndexModel := mongo.IndexModel{
-		Keys:    bson.D{{Key: "email", Value: "1"}},
+		Keys:    bson.D{{Key: "email", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

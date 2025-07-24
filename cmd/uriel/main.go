@@ -17,10 +17,11 @@ func main() {
 
 	mongodb, err := database.NewMongoClient(cfg.MongoDBURI)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to mongo: %v", err)
 	}
 
 	router := gin.Default()
+	router.Use(gin.Logger(), gin.Recovery())
 
 	// --- Initialise Repositories ---
 	authRepo := database.NewMongoAuthRepository(mongodb)
@@ -35,4 +36,7 @@ func main() {
 	{
 		auth.RegisterRoutes(v1, authHandler)
 	}
+
+	// --- Running the server ---
+	router.Run(cfg.ServerPort)
 }
