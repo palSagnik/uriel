@@ -1,5 +1,8 @@
 package config
 
+// JWT
+const TOKEN_DURATION = 36
+
 // ROLES
 const PLAYER = "player"
 const ADMIN = "admin"

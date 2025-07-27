@@ -1,6 +1,7 @@
 Todo:
   ☐ Discusing project architecture
   ✔ Designing the API and database schema @started(25-07-16 20:24) @done(25-07-16 21:13) @lasted(49m54s)
+  ✔ Implementing authentication routes @started(25-07-25 23:27) @done(25-07-26 01:41) @lasted(2h14m44s)
   ☐ Writing tests (TDD)
   ☐ Writing the backend layer
   ☐ Writing the websocket layer
