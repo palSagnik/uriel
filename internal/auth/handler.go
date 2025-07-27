@@ -42,10 +42,39 @@ func (h *Handler) RegisterPlayer(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register player"})
+		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message":   "Player registered succesfully",
-		"player_id": newPlayer.ID,
+	c.JSON(http.StatusCreated, models.RegisterResponse{
+		Message: "Player registered succesfully",
+		PlayerID: newPlayer.ID.String(),
+	})
+}
+
+func (h *Handler) LoginPlayer(c *gin.Context) {
+	var req *models.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c, 10*time.Second)
+	defer cancel()
+
+	token, playerId, err := h.service.LoginPlayerService(ctx, req.Username, req.Password)
+	if err != nil {
+		if err.Error() == "invalid username or password" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Login failed due to internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.LoginResponse{
+		Message: "Player login successful",
+		Token: token,
+		PlayerID: playerId,
 	})
 }
