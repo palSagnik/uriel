@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/palSagnik/uriel/internal/config"
 	"github.com/palSagnik/uriel/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -75,8 +77,13 @@ func (repo *mongoAuthRepository) GetPlayerByUsername(ctx context.Context, userna
 func (repo *mongoAuthRepository) GetPlayerById(ctx context.Context, id string) (*models.Player, error) {
 	var player models.Player
 
-	filter := bson.M{"player_id": id}
-	err := repo.collection.FindOne(ctx, filter).Decode(&player)
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid id %v", err)
+	}
+
+	filter := bson.M{"_id": objectId}
+	err = repo.collection.FindOne(ctx, filter).Decode(&player)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
@@ -98,4 +105,17 @@ func (repo *mongoAuthRepository) GetPlayerByEmail(ctx context.Context, email str
 		return nil, err
 	}
 	return &player, nil
+}
+
+func (repo *mongoAuthRepository) UpdatePlayerStatus(ctx context.Context, id string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": objectId}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "is_online", Value: true}}}}
+	
+	_, err = repo.collection.UpdateOne(ctx, filter, update)
+	return err
 }

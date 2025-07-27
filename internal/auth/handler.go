@@ -47,7 +47,7 @@ func (h *Handler) RegisterPlayer(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, models.RegisterResponse{
 		Message: "Player registered succesfully",
-		PlayerID: newPlayer.ID.String(),
+		PlayerID: newPlayer.ID.Hex(),
 	})
 }
 

@@ -92,13 +92,18 @@ func (s *Service) LoginPlayerService(ctx context.Context, username string, passw
 		return "", "", errors.New("invalid username or password") 
 	}
 
+	// update player online status
+	if err := s.repo.UpdatePlayerStatus(ctx, player.ID.Hex()); err != nil {
+		return "", "", fmt.Errorf("service: error in updating player status %v", err)
+	}
+
 	// generate Token
-	token, err := s.GenerateToken(player.ID.String(), player.Username, player.Role)
+	token, err := s.GenerateToken(player.ID.Hex(), player.Username, player.Role)
 	if err != nil {
 		return "", "", fmt.Errorf("service: error in generating token %v", err)
 	}
 
-	return token, player.ID.String(), nil
+	return token, player.ID.Hex(), nil
 }
 
 func (s *Service) GenerateToken(playerId, username, role string) (string, error) {
