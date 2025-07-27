@@ -27,7 +27,7 @@ func main() {
 	authRepo := database.NewMongoAuthRepository(mongodb)
 
 	// --- Initialise Services ---
-	authService := auth.NewService(authRepo)
+	authService := auth.NewService(authRepo, []byte(cfg.JWTSecret))
 
 	// --- Initialise Handlers ---
 	authHandler := auth.NewHandler(authService)
