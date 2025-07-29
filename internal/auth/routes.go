@@ -11,6 +11,5 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler) {
 		auth.POST("/register", handler.RegisterPlayer)
 		auth.POST("/login", handler.LoginPlayer)
 	}
-	
 }
 

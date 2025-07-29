@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -47,7 +48,7 @@ func (h *Handler) RegisterPlayer(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, models.RegisterResponse{
 		Message: "Player registered succesfully",
-		PlayerID: newPlayer.ID.String(),
+		PlayerID: newPlayer.ID.Hex(),
 	})
 }
 
@@ -71,6 +72,10 @@ func (h *Handler) LoginPlayer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Login failed due to internal server error"})
 		return
 	}
+
+	// send it back
+	authHeader := fmt.Sprintf("Bearer %v", token)
+	c.Header("Authorization", authHeader)
 
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Message: "Player login successful",
