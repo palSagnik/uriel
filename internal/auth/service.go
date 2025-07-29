@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/palSagnik/uriel/internal/config"
 	"github.com/palSagnik/uriel/internal/models"
@@ -126,4 +129,68 @@ func (s *Service) GenerateToken(playerId, username, role string) (string, error)
 	}
 
 	return tokenString, nil
+}
+
+func (s *Service) ValidateToken(tokenString string) (*models.Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &models.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return s.jwtSecretKey, nil
+	})
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenMalformed) {
+            return nil, errors.New("token is malformed")
+        } else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
+            return nil, errors.New("token has expired or is not yet valid")
+        }
+        return nil, fmt.Errorf("token parsing failed: %w", err)
+	}
+
+	claims, ok := token.Claims.(*models.Claims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token claims or token is not valid")
+	}
+
+	return claims, nil
+}
+
+func (s *Service) AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// get the token
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid authorisation header",
+			})
+			c.Abort()
+			return
+		}
+		
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid authorisation header",
+			})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		// validate token
+		claims, err := s.ValidateToken(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+
+		c.Set("playerID", claims.PlayerID)
+		c.Set("username", claims.Username)
+
+		c.Next()
+	}
 }
