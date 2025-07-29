@@ -19,7 +19,7 @@ type mongoAuthRepository struct {
 	collection *mongo.Collection
 }
 
-func NewMongoAuthRepository(mongodb *MongoDB) auth.AuthRepository {
+func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	var err error
 
 	playerCollection := mongodb.GetCollection(config.PLAYER_COLLECTION)
