@@ -1,12 +1,10 @@
-package player
+package user
 
 import "github.com/gin-gonic/gin"
 
-
-
 func RegisterRoutes(router *gin.RouterGroup, handler *Handler, middleware gin.HandlerFunc) {
-	players := router.Group("/players")
+	users := router.Group("/users")
 	{
-		players.GET("/locations", middleware, handler.GetPlayerLocations)
+		users.GET("/locations", middleware, handler.GetuserLocations)
 	}
 }

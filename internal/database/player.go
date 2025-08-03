@@ -4,21 +4,21 @@ import (
 	"context"
 
 	"github.com/palSagnik/uriel/internal/config"
-	"github.com/palSagnik/uriel/internal/player"
+	"github.com/palSagnik/uriel/internal/user"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type mongoPlayerRepository struct {
+type mongouserRepository struct {
 	collection *mongo.Collection
 }
 
-func NewPlayerRepository(mongo *MongoDB) player.PlayerRepository {
-	playerCollection := mongo.GetCollection(config.PLAYER_COLLECTION)
+func NewuserRepository(mongo *MongoDB) user.UserRepository {
+	userCollection := mongo.GetCollection(config.USER_COLLECTION)
 
-	return &mongoPlayerRepository{collection: playerCollection}
+	return &mongouserRepository{collection: userCollection}
 }
 
-func (repo *mongoPlayerRepository) GetPlayerLocations(ctx context.Context) error {
+func (repo *mongouserRepository) GetuserLocations(ctx context.Context) error {
 
 	return nil
 }
