@@ -22,7 +22,7 @@ type mongoAuthRepository struct {
 func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	var err error
 
-	playerCollection := mongodb.GetCollection(config.PLAYER_COLLECTION)
+	userCollection := mongodb.GetCollection(config.USER_COLLECTION)
 
 	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
@@ -41,41 +41,41 @@ func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	defer cancel()
 
 	// creating index on username
-	_, err = playerCollection.Indexes().CreateOne(ctx, usernameIndexModel)
+	_, err = userCollection.Indexes().CreateOne(ctx, usernameIndexModel)
 	if err != nil {
 		log.Printf("Warning: The unique index on username could not be created: %v", err)
 	}
 
 	// creating index on email
-	_, err = playerCollection.Indexes().CreateOne(ctx, emailIndexModel)
+	_, err = userCollection.Indexes().CreateOne(ctx, emailIndexModel)
 	if err != nil {
 		log.Printf("Warning: The unique index on email could not be created: %v", err)
 	}
-	return &mongoAuthRepository{collection: playerCollection}
+	return &mongoAuthRepository{collection: userCollection}
 }
 
 // MongoAuthRepository implementing AuthRepository interface
-func (repo *mongoAuthRepository) CreatePlayer(ctx context.Context, player models.Player) error {
-	_, err := repo.collection.InsertOne(ctx, player)
+func (repo *mongoAuthRepository) Createuser(ctx context.Context, user models.User) error {
+	_, err := repo.collection.InsertOne(ctx, user)
 	return err
 }
 
-func (repo *mongoAuthRepository) GetPlayerByUsername(ctx context.Context, username string) (*models.Player, error) {
-	var player models.Player
+func (repo *mongoAuthRepository) GetuserByUsername(ctx context.Context, username string) (*models.User, error) {
+	var user models.User
 
 	filter := bson.M{"username": username}
-	err := repo.collection.FindOne(ctx, filter).Decode(&player)
+	err := repo.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &player, nil
+	return &user, nil
 }
 
-func (repo *mongoAuthRepository) GetPlayerById(ctx context.Context, id string) (*models.Player, error) {
-	var player models.Player
+func (repo *mongoAuthRepository) GetuserById(ctx context.Context, id string) (*models.User, error) {
+	var user models.User
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -83,31 +83,31 @@ func (repo *mongoAuthRepository) GetPlayerById(ctx context.Context, id string) (
 	}
 
 	filter := bson.M{"_id": objectId}
-	err = repo.collection.FindOne(ctx, filter).Decode(&player)
+	err = repo.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &player, nil
+	return &user, nil
 }
 
-func (repo *mongoAuthRepository) GetPlayerByEmail(ctx context.Context, email string) (*models.Player, error) {
-	var player models.Player
+func (repo *mongoAuthRepository) GetuserByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
 
 	filter := bson.M{"email": email}
-	err := repo.collection.FindOne(ctx, filter).Decode(&player)
+	err := repo.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &player, nil
+	return &user, nil
 }
 
-func (repo *mongoAuthRepository) UpdatePlayerStatus(ctx context.Context, id string) error {
+func (repo *mongoAuthRepository) UpdateuserStatus(ctx context.Context, id string) error {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func (repo *mongoAuthRepository) UpdatePlayerStatus(ctx context.Context, id stri
 
 	filter := bson.M{"_id": objectId}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "is_online", Value: true}}}}
-	
+
 	_, err = repo.collection.UpdateOne(ctx, filter, update)
 	return err
 }

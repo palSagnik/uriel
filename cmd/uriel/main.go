@@ -7,9 +7,8 @@ import (
 	"github.com/palSagnik/uriel/internal/auth"
 	"github.com/palSagnik/uriel/internal/config"
 	"github.com/palSagnik/uriel/internal/database"
-	"github.com/palSagnik/uriel/internal/player"
+	"github.com/palSagnik/uriel/internal/user"
 )
-
 
 func main() {
 
@@ -26,15 +25,15 @@ func main() {
 
 	// --- Initialise Repositories ---
 	authRepo := database.NewAuthRepository(mongodb)
-	playerRepo := database.NewPlayerRepository(mongodb)
+	userRepo := database.NewuserRepository(mongodb)
 
 	// --- Initialise Services ---
 	authService := auth.NewService(authRepo, []byte(cfg.JWTSecret))
-	playerService := player.NewService(playerRepo)
+	userService := user.NewService(userRepo)
 
 	// --- Initialise Handlers ---
 	authHandler := auth.NewHandler(authService)
-	playerHandler := player.NewHandler(playerService)
+	userHandler := user.NewHandler(userService)
 
 	// --- Initialise Middleware ---
 	authMiddleware := authService.AuthMiddleware()
@@ -42,7 +41,7 @@ func main() {
 	v1 := router.Group("/api/v1")
 	{
 		auth.RegisterRoutes(v1, authHandler)
-		player.RegisterRoutes(v1, playerHandler, authMiddleware)
+		user.RegisterRoutes(v1, userHandler, authMiddleware)
 	}
 
 	// --- Running the server ---

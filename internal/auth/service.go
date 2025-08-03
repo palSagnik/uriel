@@ -18,34 +18,34 @@ import (
 )
 
 type Service struct {
-	repo AuthRepository
+	repo         AuthRepository
 	jwtSecretKey []byte
 }
 
 func NewService(repo AuthRepository, jwtSecretKey []byte) *Service {
 	return &Service{
-		repo: repo,
+		repo:         repo,
 		jwtSecretKey: jwtSecretKey,
 	}
 }
 
-func (s *Service) RegisterPlayerService(ctx context.Context, req *models.RegisterRequest) (*models.Player, error) {
+func (s *Service) RegisteruserService(ctx context.Context, req *models.RegisterRequest) (*models.User, error) {
 
 	// check if this username already exists
-	existingPlayerByUsername, err := s.repo.GetPlayerByUsername(ctx, req.Username)
+	existinguserByUsername, err := s.repo.GetuserByUsername(ctx, req.Username)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("service: error checking existing username %v", err)
 	}
-	if existingPlayerByUsername != nil {
+	if existinguserByUsername != nil {
 		return nil, errors.New("username already exists")
 	}
 
 	// check if this email already exists
-	existingPlayerByEmail, err := s.repo.GetPlayerByEmail(ctx, req.Email)
+	existinguserByEmail, err := s.repo.GetuserByEmail(ctx, req.Email)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("service: error checking existing email %v", err)
 	}
-	if existingPlayerByEmail != nil {
+	if existinguserByEmail != nil {
 		return nil, errors.New("email already exists")
 	}
 
@@ -56,69 +56,69 @@ func (s *Service) RegisterPlayerService(ctx context.Context, req *models.Registe
 		return nil, fmt.Errorf("service: error hashing password %v", err)
 	}
 
-	// create player
+	// create user
 	// TODO: Errors should be ENUMS
-	newPlayer := models.Player{
-		ID: primitive.NewObjectID(),
-		Username: req.Username,
-		Email: req.Email,
-		Password: string(hashedPassword),
-		Role: config.PLAYER,
-		IsOnline: false,
+	newuser := models.User{
+		ID:        primitive.NewObjectID(),
+		Username:  req.Username,
+		Email:     req.Email,
+		Password:  string(hashedPassword),
+		Role:      config.USER,
+		IsOnline:  false,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	if err := s.repo.CreatePlayer(ctx, newPlayer); err != nil {
-		return nil, fmt.Errorf("service: error in creating new player %v", err)
+	if err := s.repo.Createuser(ctx, newuser); err != nil {
+		return nil, fmt.Errorf("service: error in creating new user %v", err)
 	}
 
-	return &newPlayer, nil
+	return &newuser, nil
 }
 
-func (s *Service) LoginPlayerService(ctx context.Context, username string, password string) (string, string, error) {
-	
-	// retrieve player
-	player, err := s.repo.GetPlayerByUsername(ctx, username)
+func (s *Service) LoginuserService(ctx context.Context, username string, password string) (string, string, error) {
+
+	// retrieve user
+	user, err := s.repo.GetuserByUsername(ctx, username)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return "", "", errors.New("invalid username or password")
 		}
-		return "", "", fmt.Errorf("service: error retrieving player %v", err)
+		return "", "", fmt.Errorf("service: error retrieving user %v", err)
 	}
-	if player == nil {
+	if user == nil {
 		return "", "", errors.New("invalid username or password")
 	}
 
 	// compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(player.Password), []byte(password)); err != nil {
-		return "", "", errors.New("invalid username or password") 
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", "", errors.New("invalid username or password")
 	}
 
-	// update player online status
-	if err := s.repo.UpdatePlayerStatus(ctx, player.ID.Hex()); err != nil {
-		return "", "", fmt.Errorf("service: error in updating player status %v", err)
+	// update user online status
+	if err := s.repo.UpdateuserStatus(ctx, user.ID.Hex()); err != nil {
+		return "", "", fmt.Errorf("service: error in updating user status %v", err)
 	}
 
 	// generate Token
-	token, err := s.GenerateToken(player.ID.Hex(), player.Username, player.Role)
+	token, err := s.GenerateToken(user.ID.Hex(), user.Username, user.Role)
 	if err != nil {
 		return "", "", fmt.Errorf("service: error in generating token %v", err)
 	}
 
-	return token, player.ID.Hex(), nil
+	return token, user.ID.Hex(), nil
 }
 
-func (s *Service) GenerateToken(playerId, username, role string) (string, error) {
+func (s *Service) GenerateToken(userId, username, role string) (string, error) {
 	claims := models.Claims{
-		PlayerID: playerId,
+		UserID:   userId,
 		Username: username,
-		Role: role,
-		RegisteredClaims: jwt.RegisteredClaims {
+		Role:     role,
+		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * config.TOKEN_DURATION)),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer: "uriel",
+			Issuer:    "uriel",
 		},
 	}
 
@@ -141,11 +141,11 @@ func (s *Service) ValidateToken(tokenString string) (*models.Claims, error) {
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenMalformed) {
-            return nil, errors.New("token is malformed")
-        } else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
-            return nil, errors.New("token has expired or is not yet valid")
-        }
-        return nil, fmt.Errorf("token parsing failed: %w", err)
+			return nil, errors.New("token is malformed")
+		} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
+			return nil, errors.New("token has expired or is not yet valid")
+		}
+		return nil, fmt.Errorf("token parsing failed: %w", err)
 	}
 
 	claims, ok := token.Claims.(*models.Claims)
@@ -167,7 +167,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid authorisation header",
@@ -188,7 +188,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("playerID", claims.PlayerID)
+		c.Set("userID", claims.UserID)
 		c.Set("username", claims.Username)
 
 		c.Next()
