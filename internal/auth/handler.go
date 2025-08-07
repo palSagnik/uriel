@@ -20,7 +20,7 @@ func NewHandler(authService *Service) *Handler {
 
 // RegisterPlayer is a Gin handler for player registration.
 // It works between the HTTP request and the AuthService.
-func (h *Handler) RegisterPlayer(c *gin.Context) {
+func (h *Handler) RegisterUser(c *gin.Context) {
 	var req *models.RegisterRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -36,7 +36,7 @@ func (h *Handler) RegisterPlayer(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 10*time.Second)
 	defer cancel()
 
-	newPlayer, err := h.service.RegisterPlayerService(ctx, req)
+	newUser, err := h.service.RegisterUserService(ctx, req)
 	if err != nil {
 		if err.Error() == "email already exists" || err.Error() == "username already exists" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,11 +48,11 @@ func (h *Handler) RegisterPlayer(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, models.RegisterResponse{
 		Message: "Player registered succesfully",
-		PlayerID: newPlayer.ID.Hex(),
+		PlayerID: newUser.ID.Hex(),
 	})
 }
 
-func (h *Handler) LoginPlayer(c *gin.Context) {
+func (h *Handler) LoginUser(c *gin.Context) {
 	var req *models.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,7 +63,7 @@ func (h *Handler) LoginPlayer(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 10*time.Second)
 	defer cancel()
 
-	token, playerId, err := h.service.LoginPlayerService(ctx, req.Username, req.Password)
+	token, userId, err := h.service.LoginUserService(ctx, req.Username, req.Password)
 	if err != nil {
 		if err.Error() == "invalid username or password" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -80,6 +80,6 @@ func (h *Handler) LoginPlayer(c *gin.Context) {
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Message: "Player login successful",
 		Token: token,
-		PlayerID: playerId,
+		PlayerID: userId,
 	})
 }

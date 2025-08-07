@@ -22,7 +22,7 @@ type mongoAuthRepository struct {
 func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	var err error
 
-	playerCollection := mongodb.GetCollection(config.PLAYER_COLLECTION)
+	playerCollection := mongodb.GetCollection(config.USER_COLLECTION)
 
 	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
@@ -55,27 +55,27 @@ func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 }
 
 // MongoAuthRepository implementing AuthRepository interface
-func (repo *mongoAuthRepository) CreatePlayer(ctx context.Context, player models.Player) error {
-	_, err := repo.collection.InsertOne(ctx, player)
+func (repo *mongoAuthRepository) CreateUser(ctx context.Context, user models.User) error {
+	_, err := repo.collection.InsertOne(ctx, user)
 	return err
 }
 
-func (repo *mongoAuthRepository) GetPlayerByUsername(ctx context.Context, username string) (*models.Player, error) {
-	var player models.Player
+func (repo *mongoAuthRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+	var user models.User
 
 	filter := bson.M{"username": username}
-	err := repo.collection.FindOne(ctx, filter).Decode(&player)
+	err := repo.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &player, nil
+	return &user, nil
 }
 
-func (repo *mongoAuthRepository) GetPlayerById(ctx context.Context, id string) (*models.Player, error) {
-	var player models.Player
+func (repo *mongoAuthRepository) GetUserById(ctx context.Context, id string) (*models.User, error) {
+	var user models.User
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -83,31 +83,31 @@ func (repo *mongoAuthRepository) GetPlayerById(ctx context.Context, id string) (
 	}
 
 	filter := bson.M{"_id": objectId}
-	err = repo.collection.FindOne(ctx, filter).Decode(&player)
+	err = repo.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &player, nil
+	return &user, nil
 }
 
-func (repo *mongoAuthRepository) GetPlayerByEmail(ctx context.Context, email string) (*models.Player, error) {
-	var player models.Player
+func (repo *mongoAuthRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
 
 	filter := bson.M{"email": email}
-	err := repo.collection.FindOne(ctx, filter).Decode(&player)
+	err := repo.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
 		return nil, err
 	}
-	return &player, nil
+	return &user, nil
 }
 
-func (repo *mongoAuthRepository) UpdatePlayerStatus(ctx context.Context, id string) error {
+func (repo *mongoAuthRepository) UpdateUserStatus(ctx context.Context, id string) error {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err

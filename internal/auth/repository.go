@@ -7,9 +7,9 @@ import (
 )
 
 type AuthRepository interface {
-	CreatePlayer(ctx context.Context, player models.Player) error
-	GetPlayerByUsername(ctx context.Context, username string) (*models.Player, error)
-	GetPlayerById(ctx context.Context, id string) (*models.Player, error)
-	GetPlayerByEmail(ctx context.Context, email string) (*models.Player, error)
-	UpdatePlayerStatus(ctx context.Context, id string) error
+	CreateUser(ctx context.Context, user models.User) error
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
+	GetUserById(ctx context.Context, id string) (*models.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	UpdateUserStatus(ctx context.Context, id string) error
 }
