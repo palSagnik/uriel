@@ -109,9 +109,9 @@ func (s *Service) LoginUserService(ctx context.Context, username string, passwor
 	return token, user.ID.Hex(), nil
 }
 
-func (s *Service) GenerateToken(playerId, username, role string) (string, error) {
+func (s *Service) GenerateToken(userId, username, role string) (string, error) {
 	claims := models.Claims{
-		PlayerID: playerId,
+		UserID: userId,
 		Username: username,
 		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims {
@@ -188,7 +188,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("playerID", claims.PlayerID)
+		c.Set("playerID", claims.UserID)
 		c.Set("username", claims.Username)
 
 		c.Next()

@@ -42,13 +42,13 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register player"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, models.RegisterResponse{
-		Message: "Player registered succesfully",
-		PlayerID: newUser.ID.Hex(),
+		Message: "User registered succesfully",
+		UserID: newUser.ID.Hex(),
 	})
 }
 
@@ -80,6 +80,6 @@ func (h *Handler) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Message: "Player login successful",
 		Token: token,
-		PlayerID: userId,
+		UserID: userId,
 	})
 }

@@ -12,8 +12,8 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Message  string `json:"message"`
-	PlayerID string `json:"player_id"`
+	Message string `json:"message"`
+	UserID  string `json:"player_id"`
 }
 
 type LoginRequest struct {
@@ -22,14 +22,14 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Message  string `json:"message"`
-	Token    string `json:"token"`
-	PlayerID string `json:"player_id"`
+	Message string `json:"message"`
+	Token   string `json:"token"`
+	UserID  string `json:"player_id"`
 }
 
 type Claims struct {
-	PlayerID         string
-	Username         string
-	Role             string
+	UserID   string
+	Username string
+	Role     string
 	jwt.RegisteredClaims
 }

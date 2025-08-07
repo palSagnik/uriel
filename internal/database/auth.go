@@ -22,7 +22,7 @@ type mongoAuthRepository struct {
 func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	var err error
 
-	playerCollection := mongodb.GetCollection(config.USER_COLLECTION)
+	userCollection := mongodb.GetCollection(config.USER_COLLECTION)
 
 	// ensuring proper indexes efficient login and preventing duplicates
 	// this helps in data integrity
@@ -41,17 +41,17 @@ func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 	defer cancel()
 
 	// creating index on username
-	_, err = playerCollection.Indexes().CreateOne(ctx, usernameIndexModel)
+	_, err = userCollection.Indexes().CreateOne(ctx, usernameIndexModel)
 	if err != nil {
 		log.Printf("Warning: The unique index on username could not be created: %v", err)
 	}
 
 	// creating index on email
-	_, err = playerCollection.Indexes().CreateOne(ctx, emailIndexModel)
+	_, err = userCollection.Indexes().CreateOne(ctx, emailIndexModel)
 	if err != nil {
 		log.Printf("Warning: The unique index on email could not be created: %v", err)
 	}
-	return &mongoAuthRepository{collection: playerCollection}
+	return &mongoAuthRepository{collection: userCollection}
 }
 
 // MongoAuthRepository implementing AuthRepository interface

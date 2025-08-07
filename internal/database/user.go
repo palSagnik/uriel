@@ -8,17 +8,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type mongouserRepository struct {
+type mongoUserRepository struct {
 	collection *mongo.Collection
 }
 
 func NewUserRepository(mongo *MongoDB) user.UserRepository {
 	userCollection := mongo.GetCollection(config.USER_COLLECTION)
 
-	return &mongouserRepository{collection: userCollection}
+	return &mongoUserRepository{collection: userCollection}
 }
 
-func (repo *mongouserRepository) GetUserLocations(ctx context.Context) error {
+func (repo *mongoUserRepository) GetUserLocations(ctx context.Context) error {
 
 	return nil
 }
