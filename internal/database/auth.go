@@ -55,12 +55,12 @@ func NewAuthRepository(mongodb *MongoDB) auth.AuthRepository {
 }
 
 // MongoAuthRepository implementing AuthRepository interface
-func (repo *mongoAuthRepository) Createuser(ctx context.Context, user models.User) error {
+func (repo *mongoAuthRepository) CreateUser(ctx context.Context, user models.User) error {
 	_, err := repo.collection.InsertOne(ctx, user)
 	return err
 }
 
-func (repo *mongoAuthRepository) GetuserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (repo *mongoAuthRepository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	var user models.User
 
 	filter := bson.M{"username": username}
@@ -74,7 +74,7 @@ func (repo *mongoAuthRepository) GetuserByUsername(ctx context.Context, username
 	return &user, nil
 }
 
-func (repo *mongoAuthRepository) GetuserById(ctx context.Context, id string) (*models.User, error) {
+func (repo *mongoAuthRepository) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	var user models.User
 
 	objectId, err := primitive.ObjectIDFromHex(id)
@@ -93,7 +93,7 @@ func (repo *mongoAuthRepository) GetuserById(ctx context.Context, id string) (*m
 	return &user, nil
 }
 
-func (repo *mongoAuthRepository) GetuserByEmail(ctx context.Context, email string) (*models.User, error) {
+func (repo *mongoAuthRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
 
 	filter := bson.M{"email": email}
@@ -107,7 +107,7 @@ func (repo *mongoAuthRepository) GetuserByEmail(ctx context.Context, email strin
 	return &user, nil
 }
 
-func (repo *mongoAuthRepository) UpdateuserStatus(ctx context.Context, id string) error {
+func (repo *mongoAuthRepository) UpdateUserStatus(ctx context.Context, id string) error {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err

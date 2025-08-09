@@ -3,5 +3,5 @@ package user
 import "context"
 
 type UserRepository interface {
-	GetuserLocations(ctx context.Context) error
+  GetUserLocations(ctx context.Context) error
 }

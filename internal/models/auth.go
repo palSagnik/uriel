@@ -16,6 +16,10 @@ type RegisterResponse struct {
 	UserID  string `json:"user_id"`
 }
 
+type FailedResponse struct {
+	Error string `json:"message"`
+}
+
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -24,8 +28,9 @@ type LoginRequest struct {
 type LoginResponse struct {
 	Message string `json:"message"`
 	Token   string `json:"token"`
-	UserID  string `json:"user_id"`
+  UserID  string `json:"user_id"`
 }
+
 
 type Claims struct {
 	UserID   string
