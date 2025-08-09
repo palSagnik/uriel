@@ -1,11 +1,17 @@
 package user
 
+import "context"
+
 type Service struct {
 	repo UserRepository
 }
 
-func NewService(userRepo UserRepository) *Service {
+func NewService(repo UserRepository) *Service {
 	return &Service{
-		repo: userRepo,
+		repo: repo,
 	}
+}
+
+func (s *Service) UpdateMetadata(ctx context.Context, avatarUrl string) (string, error) {
+	return "", nil
 }

@@ -29,23 +29,23 @@ func NewService(repo AuthRepository, jwtSecretKey []byte) *Service {
 	}
 }
 
-func (s *Service) RegisteruserService(ctx context.Context, req *models.RegisterRequest) (*models.User, error) {
+func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterRequest) (*models.User, error) {
 
 	// check if this username already exists
-	existinguserByUsername, err := s.repo.GetuserByUsername(ctx, req.Username)
+	existingUserByUsername, err := s.repo.GetUserByUsername(ctx, req.Username)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("service: error checking existing username %v", err)
 	}
-	if existinguserByUsername != nil {
+	if existingUserByUsername != nil {
 		return nil, errors.New("username already exists")
 	}
 
 	// check if this email already exists
-	existinguserByEmail, err := s.repo.GetuserByEmail(ctx, req.Email)
+  existingUserByEmail, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("service: error checking existing email %v", err)
 	}
-	if existinguserByEmail != nil {
+	if existingUserByEmail != nil {
 		return nil, errors.New("email already exists")
 	}
 
@@ -58,7 +58,7 @@ func (s *Service) RegisteruserService(ctx context.Context, req *models.RegisterR
 
 	// create user
 	// TODO: Errors should be ENUMS
-	newuser := models.User{
+newuser := models.User{
 		ID:        primitive.NewObjectID(),
 		Username:  req.Username,
 		Email:     req.Email,
@@ -69,17 +69,16 @@ func (s *Service) RegisteruserService(ctx context.Context, req *models.RegisterR
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	if err := s.repo.Createuser(ctx, newuser); err != nil {
+if err := s.repo.CreateUser(ctx, newUser); err != nil {
 		return nil, fmt.Errorf("service: error in creating new user %v", err)
 	}
-
-	return &newuser, nil
+	return &newUser, nil
 }
 
-func (s *Service) LoginuserService(ctx context.Context, username string, password string) (string, string, error) {
+func (s *Service) LoginUserService(ctx context.Context, username string, password string) (string, string, error) {
 
 	// retrieve user
-	user, err := s.repo.GetuserByUsername(ctx, username)
+	user, err := s.repo.GetUserByUsername(ctx, username)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return "", "", errors.New("invalid username or password")
@@ -92,11 +91,11 @@ func (s *Service) LoginuserService(ctx context.Context, username string, passwor
 
 	// compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", "", errors.New("invalid username or password")
+		return "", "", errors.New("invalid username or password") 
 	}
 
 	// update user online status
-	if err := s.repo.UpdateuserStatus(ctx, user.ID.Hex()); err != nil {
+	if err := s.repo.UpdateUserStatus(ctx, user.ID.Hex()); err != nil {
 		return "", "", fmt.Errorf("service: error in updating user status %v", err)
 	}
 
@@ -111,7 +110,7 @@ func (s *Service) LoginuserService(ctx context.Context, username string, passwor
 
 func (s *Service) GenerateToken(userId, username, role string) (string, error) {
 	claims := models.Claims{
-		UserID:   userId,
+    UserID: userId,
 		Username: username,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -188,7 +187,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("userID", claims.UserID)
+    c.Set("userID", claims.UserID)
 		c.Set("username", claims.Username)
 
 		c.Next()
