@@ -1,385 +1,570 @@
-No problem, here is the API route design in Markdown format.
-
------
-
-# API Route Design
+# Uriel Virtual Office Platform - API Design
 
 **Base URL:** `/api/v1`
 
-## I. Authentication & User Management Routes
+## Overview
 
-These routes handle player registration, login, and token management.
+Uriel is a virtual office platform that enables distributed teams to collaborate, communicate, and feel connected in persistent digital spaces. This API supports real-time presence, proximity-based interactions, video conferencing, screen sharing, and seamless integrations with productivity tools.
 
-1.  **Player Registration**
+---
 
-      * **Endpoint:** `/api/v1/auth/register`
-      * **Method:** `POST`
-      * **Purpose:** Allows new players to create an account.
-      * **Authentication:** None (public access)
-      * **Request Body (JSON):**
-        ```json
+## I. Authentication & User Management
+
+### 1. User Registration
+* **Endpoint:** `/api/v1/auth/register`
+* **Method:** `POST`
+* **Purpose:** Register a new user account
+* **Authentication:** None (public)
+* **Request Body:**
+```json
+{
+    "email": "user@company.com",
+    "username": "johndoe",
+    "password": "secure_password",
+    "full_name": "John Doe",
+}
+```
+* **Response (Success - 201):**
+```json
+{
+    "message": "User registered successfully",
+    "user_id": "uuid-string",
+    "workspace_id": "workspace-uuid"
+}
+```
+
+### 2. User Login
+* **Endpoint:** `/api/v1/auth/login`
+* **Method:** `POST`
+* **Purpose:** Authenticate user and get access token
+* **Request Body:**
+```json
+{
+    "email": "user@company.com",
+    "password": "secure_password"
+}
+```
+* **Response (Success - 200):**
+```json
+{
+    "message": "Login successful",
+    "access_token": "jwt-token",
+    "refresh_token": "refresh-jwt",
+    "user": {
+        "user_id": "uuid-string",
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "user@company.com",
+        "avatar_url": "https://cdn.uriel.com/avatars/user.png",
+        "role": "member",
+        "workspace_id": "workspace-uuid"
+    }
+}
+```
+
+### 3. Token Refresh
+* **Endpoint:** `/api/v1/auth/refresh`
+* **Method:** `POST`
+* **Purpose:** Refresh access token using refresh token
+* **Request Body:**
+```json
+{
+    "refresh_token": "refresh-jwt"
+}
+```
+
+### 4. User Profile
+* **Endpoint:** `/api/v1/users/profile`
+* **Method:** `GET|PUT`
+* **Purpose:** Get or update user profile
+* **Authentication:** Required
+* **PUT Request Body:**
+```json
+{
+    "full_name": "John Smith",
+    "avatar_url": "https://cdn.uriel.com/avatars/new-avatar.png",
+    "status_message": "Working on Q4 planning",
+    "timezone": "America/New_York"
+}
+```
+
+---
+
+## II. Workspace Management
+
+### 1. Get Workspace Details
+* **Endpoint:** `/api/v1/workspaces/:workspace_id`
+* **Method:** `GET`
+* **Purpose:** Get workspace information and settings
+* **Response:**
+```json
+{
+    "workspace_id": "workspace-uuid",
+    "name": "Tech Corp Office",
+    "description": "Our virtual headquarters",
+    "settings": {
+        "allow_guests": true,
+        "require_approval": false,
+        "default_room": "main-office",
+        "max_users": 100
+    },
+    "owner_id": "owner-uuid",
+    "created_at": "2025-01-01T00:00:00Z"
+}
+```
+
+### 2. Workspace Members
+* **Endpoint:** `/api/v1/workspaces/:workspace_id/members`
+* **Method:** `GET`
+* **Purpose:** List all workspace members
+* **Query Parameters:**
+  * `status`: Filter by online status (`online`, `offline`, `away`)
+  * `room_id`: Filter by current room
+* **Response:**
+```json
+{
+    "members": [
         {
-            "username": "player123",
-            "email": "player@example.com",
-            "password": "secure_password_123"
+            "user_id": "uuid-1",
+            "username": "johndoe",
+            "full_name": "John Doe",
+            "avatar_url": "https://cdn.uriel.com/avatars/john.png",
+            "role": "admin",
+            "status": "online",
+            "current_room_id": "main-office",
+            "position": {"x": 150, "y": 200},
+            "last_seen": "2025-01-16T14:30:00Z"
         }
-        ```
-      * **Response (Success - HTTP 201 Created):**
-        ```json
+    ],
+    "total_count": 25,
+    "online_count": 8
+}
+```
+
+### 3. Invite Users
+* **Endpoint:** `/api/v1/workspaces/:workspace_id/invites`
+* **Method:** `POST`
+* **Purpose:** Send workspace invitations
+* **Request Body:**
+```json
+{
+    "invites": [
         {
-            "message": "Player registered successfully",
-            "player_id": "uuid-of-new-player"
+            "email": "newuser@company.com",
+            "role": "member",
+            "personal_message": "Welcome to our team!"
         }
-        ```
-      * **Response (Error - HTTP 400 Bad Request, 409 Conflict):**
-        ```json
+    ]
+}
+```
+
+---
+
+## III. Room Management
+
+### 1. List Rooms
+* **Endpoint:** `/api/v1/workspaces/:workspace_id/rooms`
+* **Method:** `GET`
+* **Purpose:** Get all rooms in workspace
+* **Response:**
+```json
+{
+    "rooms": [
         {
-            "error": "Username or email already exists"
+            "room_id": "main-office",
+            "name": "Main Office",
+            "type": "office",
+            "capacity": 50,
+            "current_users": 12,
+            "background_url": "https://cdn.uriel.com/backgrounds/office.jpg",
+            "is_private": false,
+            "created_at": "2025-01-01T00:00:00Z"
+        },
+        {
+            "room_id": "meeting-room-a",
+            "name": "Conference Room A",
+            "type": "meeting",
+            "capacity": 10,
+            "current_users": 0,
+            "background_url": "https://cdn.uriel.com/backgrounds/meeting.jpg",
+            "is_private": false
         }
-        ```
-      * **Gin Handler (Conceptual):** `auth.RegisterPlayer`
+    ]
+}
+```
 
-2.  **Player Login**
+### 2. Create Room
+* **Endpoint:** `/api/v1/workspaces/:workspace_id/rooms`
+* **Method:** `POST`
+* **Purpose:** Create a new room
+* **Request Body:**
+```json
+{
+    "name": "Design Team Room",
+    "type": "team",
+    "capacity": 15,
+    "background_url": "https://cdn.uriel.com/backgrounds/creative.jpg",
+    "is_private": false,
+    "description": "Dedicated space for design team collaboration"
+}
+```
 
-      * **Endpoint:** `/api/v1/auth/login`
-      * **Method:** `POST`
-      * **Purpose:** Authenticates a player and issues a JWT.
-      * **Authentication:** None (public access)
-      * **Request Body (JSON):**
-        ```json
+### 3. Room Details
+* **Endpoint:** `/api/v1/rooms/:room_id`
+* **Method:** `GET`
+* **Purpose:** Get detailed room information including current users
+* **Response:**
+```json
+{
+    "room_id": "main-office",
+    "name": "Main Office",
+    "type": "office",
+    "capacity": 50,
+    "background_url": "https://cdn.uriel.com/backgrounds/office.jpg",
+    "current_users": [
         {
-            "username": "player123",
-            "password": "secure_password_123"
+            "user_id": "uuid-1",
+            "username": "johndoe",
+            "full_name": "John Doe",
+            "avatar_url": "https://cdn.uriel.com/avatars/john.png",
+            "position": {"x": 150, "y": 200},
+            "is_speaking": false,
+            "is_sharing_screen": false,
+            "joined_at": "2025-01-16T14:00:00Z"
         }
-        ```
-      * **Response (Success - HTTP 200 OK):**
-        ```json
+    ],
+    "objects": [
         {
-            "message": "Login successful",
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "player_id": "uuid-of-player"
+            "object_id": "whiteboard-1",
+            "type": "whiteboard",
+            "position": {"x": 300, "y": 100},
+            "size": {"width": 200, "height": 150},
+            "data": {"content_url": "https://cdn.uriel.com/whiteboards/board1.json"}
         }
-        ```
-      * **Response (Error - HTTP 401 Unauthorized, 400 Bad Request):**
-        ```json
-        {
-            "error": "Invalid credentials"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `auth.LoginPlayer`
+    ]
+}
+```
 
-3.  **Token Refresh (Optional but Recommended)**
+### 4. Join Room
+* **Endpoint:** `/api/v1/rooms/:room_id/join`
+* **Method:** `POST`
+* **Purpose:** Join a specific room
+* **Request Body:**
+```json
+{
+    "position": {"x": 100, "y": 150}
+}
+```
 
-      * **Endpoint:** `/api/v1/auth/refresh`
-      * **Method:** `POST`
-      * **Purpose:** Allows players to refresh their JWT using a refresh token (if implemented) without re-logging in.
-      * **Authentication:** Requires a valid, unexpired refresh token.
-      * **Request Body (JSON):**
-        ```json
-        {
-            "refresh_token": "your_refresh_token_here"
-        }
-        ```
-      * **Response (Success - HTTP 200 OK):**
-        ```json
-        {
-            "message": "Token refreshed successfully",
-            "token": "new_jwt_token_here"
-        }
-        ```
-      * **Response (Error - HTTP 401 Unauthorized):**
-        ```json
-        {
-            "error": "Invalid or expired refresh token"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `auth.RefreshToken`
+### 5. Leave Room
+* **Endpoint:** `/api/v1/rooms/:room_id/leave`
+* **Method:** `POST`
+* **Purpose:** Leave current room
 
------
+---
 
-## II. Player Location & Data Routes
+## IV. Real-time Presence & Movement
 
-These routes handle real-time player position updates and fetching player-related information.
+### 1. Update Position
+* **Endpoint:** `/api/v1/users/position`
+* **Method:** `PUT`
+* **Purpose:** Update user's position in current room
+* **Request Body:**
+```json
+{
+    "room_id": "main-office",
+    "position": {"x": 250, "y": 180},
+    "facing_direction": "right"
+}
+```
 
-1.  **Update Player Location**
+### 2. Update Status
+* **Endpoint:** `/api/v1/users/status`
+* **Method:** `PUT`
+* **Purpose:** Update user's availability status
+* **Request Body:**
+```json
+{
+    "status": "busy",
+    "message": "In a meeting until 3 PM",
+    "auto_expire_at": "2025-01-16T15:00:00Z"
+}
+```
 
-      * **Endpoint:** `/api/v1/players/:player_id/location`
-      * **Method:** `PUT` or `PATCH` (PUT for full replacement, PATCH for partial update; PATCH is slightly more semantically correct for just updating location, but PUT is often used for simplicity for "set current state").
-      * **Purpose:** Allows a player to send their real-time location updates. This will be the **high-throughput, low-latency** endpoint.
-      * **Authentication:** Required (JWT from logged-in player). Authorization: Player must be updating their *own* location.
-      * **Request Body (JSON):**
-        ```json
-        {
-            "latitude": 34.0522,
-            "longitude": -118.2437,
-            "timestamp": "2025-07-16T14:30:00Z" // ISO 8601 format
-        }
-        ```
-      * **Response (Success - HTTP 200 OK or 204 No Content):**
-        ```json
-        {
-            "message": "Location updated successfully"
-        }
-        ```
-        (Or an empty body with 204 if no additional information is needed).
-      * **Response (Error - HTTP 400 Bad Request, 401 Unauthorized, 403 Forbidden, 500 Internal Server Error):**
-        ```json
-        {
-            "error": "Invalid location data"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `player.UpdatePlayerLocation`
+---
 
-2.  **Get Player Locations (for Map Rendering)**
+## V. Communication & Meetings
 
-      * **Endpoint:** `/api/v1/players/locations`
-      * **Method:** `GET`
-      * **Purpose:** Retrieves the locations of multiple players for map rendering. Could support filtering for nearby players.
-      * **Authentication:** Required (JWT from any authenticated player).
-      * **Query Parameters (Optional):**
-          * `center_lat`: Latitude of the map center.
-          * `center_lon`: Longitude of the map center.
-          * `radius_km`: Radius in kilometers to search for players around the center.
-          * `limit`: Maximum number of players to return.
-      * **Response (Success - HTTP 200 OK):**
-        ```json
-        {
-            "players": [
-                {
-                    "player_id": "uuid-of-player-1",
-                    "username": "Alice",
-                    "latitude": 34.0530,
-                    "longitude": -118.2440,
-                    "timestamp": "2025-07-16T14:30:05Z"
-                },
-                {
-                    "player_id": "uuid-of-player-2",
-                    "username": "Bob",
-                    "latitude": 34.0510,
-                    "longitude": -118.2420,
-                    "timestamp": "2025-07-16T14:30:02Z"
-                }
-            ]
-        }
-        ```
-      * **Response (Error - HTTP 401 Unauthorized, 500 Internal Server Error):**
-        ```json
-        {
-            "error": "Authentication required"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `player.GetPlayerLocations`
+### 1. Start Proximity Chat
+* **Endpoint:** `/api/v1/communication/proximity/start`
+* **Method:** `POST`
+* **Purpose:** Initiate proximity-based voice chat
+* **Request Body:**
+```json
+{
+    "room_id": "main-office",
+    "target_user_ids": ["uuid-1", "uuid-2"]
+}
+```
 
------
+### 2. Create Meeting
+* **Endpoint:** `/api/v1/meetings`
+* **Method:** `POST`
+* **Purpose:** Schedule or start an instant meeting
+* **Request Body:**
+```json
+{
+    "title": "Q4 Planning Review",
+    "description": "Quarterly planning discussion",
+    "room_id": "meeting-room-a",
+    "scheduled_start": "2025-01-16T16:00:00Z",
+    "duration_minutes": 60,
+    "invitees": ["user-1", "user-2", "user-3"],
+    "is_instant": false
+}
+```
 
-## III. Points of Interest (POI) Routes
+### 3. Join Meeting
+* **Endpoint:** `/api/v1/meetings/:meeting_id/join`
+* **Method:** `POST`
+* **Purpose:** Join an existing meeting
+* **Response:**
+```json
+{
+    "meeting_id": "meeting-uuid",
+    "webrtc_config": {
+        "ice_servers": [
+            {"urls": "stun:stun.uriel.com:3478"},
+            {"urls": "turn:turn.uriel.com:3478", "username": "user", "credential": "pass"}
+        ]
+    },
+    "room_url": "https://meet.uriel.com/room/meeting-uuid"
+}
+```
 
-These routes allow for the management and retrieval of POIs. Administrative or Game Master roles would typically manage these.
+---
 
-1.  **Create POI**
+## VI. Screen Sharing & Collaboration
 
-      * **Endpoint:** `/api/v1/pois/create`
-      * **Method:** `POST`
-      * **Purpose:** Adds a new Point of Interest to the game world.
-      * **Authentication:** Required (JWT). **Authorization:** Must have `admin` or `game_master` role.
-      * **Request Body (JSON):**
-        ```json
-        {
-            "name": "Healing Spring",
-            "type": "healing_station",
-            "latitude": 34.0600,
-            "longitude": -118.2500,
-            "description": "A mystical spring that restores health.",
-            "metadata": {
-                "heal_amount": 50,
-                "respawn_time_seconds": 300
+### 1. Start Screen Share
+* **Endpoint:** `/api/v1/collaboration/screen-share/start`
+* **Method:** `POST`
+* **Purpose:** Initiate screen sharing session
+* **Request Body:**
+```json
+{
+    "room_id": "main-office",
+    "share_type": "window",
+    "target_audience": "proximity"
+}
+```
+
+### 2. Whiteboard Operations
+* **Endpoint:** `/api/v1/collaboration/whiteboards/:whiteboard_id`
+* **Method:** `GET|PUT|DELETE`
+* **Purpose:** Manage whiteboard content
+* **PUT Request Body:**
+```json
+{
+    "content": {
+        "elements": [
+            {
+                "type": "text",
+                "position": {"x": 10, "y": 10},
+                "content": "Project Timeline",
+                "style": {"font_size": 16, "color": "#000000"}
             }
+        ]
+    }
+}
+```
+
+---
+
+## VII. Integrations
+
+### 1. Calendar Integration
+* **Endpoint:** `/api/v1/integrations/calendar/connect`
+* **Method:** `POST`
+* **Purpose:** Connect external calendar (Google, Outlook)
+* **Request Body:**
+```json
+{
+    "provider": "google",
+    "auth_code": "google-oauth-code",
+    "sync_settings": {
+        "import_meetings": true,
+        "create_room_for_meetings": true
+    }
+}
+```
+
+### 2. Slack Integration
+* **Endpoint:** `/api/v1/integrations/slack/connect`
+* **Method:** `POST`
+* **Purpose:** Connect Slack workspace
+* **Request Body:**
+```json
+{
+    "workspace_id": "slack-workspace-id",
+    "bot_token": "slack-bot-token",
+    "settings": {
+        "sync_status": true,
+        "notifications": true,
+        "channel_mapping": {
+            "general": "main-office",
+            "dev-team": "dev-room"
         }
-        ```
-      * **Response (Success - HTTP 201 Created):**
-        ```json
+    }
+}
+```
+
+---
+
+## VIII. WebSocket Endpoints
+
+### 1. Real-time Updates
+* **Endpoint:** `/ws/presence`
+* **Method:** WebSocket Upgrade
+* **Purpose:** Real-time presence, movement, and communication updates
+* **Authentication:** JWT via query parameter or header
+
+**Incoming Message Types:**
+```json
+// Position update
+{
+    "type": "position_update",
+    "room_id": "main-office",
+    "position": {"x": 150, "y": 200},
+    "facing_direction": "right"
+}
+
+// Voice chat state
+{
+    "type": "voice_state",
+    "is_muted": false,
+    "is_speaking": true,
+    "proximity_range": 50
+}
+```
+
+**Outgoing Message Types:**
+```json
+// User joined room
+{
+    "type": "user_joined",
+    "user": {
+        "user_id": "uuid-1",
+        "username": "johndoe",
+        "avatar_url": "...",
+        "position": {"x": 100, "y": 150}
+    },
+    "room_id": "main-office"
+}
+
+// User moved
+{
+    "type": "user_moved",
+    "user_id": "uuid-1",
+    "position": {"x": 200, "y": 180},
+    "room_id": "main-office"
+}
+
+// Proximity chat started
+{
+    "type": "proximity_chat_started",
+    "participants": ["uuid-1", "uuid-2"],
+    "chat_id": "chat-uuid"
+}
+```
+
+---
+
+## IX. File & Asset Management
+
+### 1. Upload Avatar
+* **Endpoint:** `/api/v1/uploads/avatar`
+* **Method:** `POST`
+* **Content-Type:** `multipart/form-data`
+* **Purpose:** Upload user avatar image
+
+### 2. Upload Room Background
+* **Endpoint:** `/api/v1/uploads/room-background`
+* **Method:** `POST`
+* **Content-Type:** `multipart/form-data`
+* **Purpose:** Upload custom room background
+
+### 3. File Sharing
+* **Endpoint:** `/api/v1/files/share`
+* **Method:** `POST`
+* **Purpose:** Share files in room or meeting
+* **Request Body:**
+```json
+{
+    "file_url": "https://storage.uriel.com/files/document.pdf",
+    "file_name": "Q4_Report.pdf",
+    "room_id": "main-office",
+    "share_type": "broadcast"
+}
+```
+
+---
+
+## X. Analytics & Reporting
+
+### 1. Workspace Analytics
+* **Endpoint:** `/api/v1/analytics/workspace/:workspace_id`
+* **Method:** `GET`
+* **Purpose:** Get workspace usage analytics
+* **Query Parameters:**
+  * `period`: `day`, `week`, `month`
+  * `metric`: `active_users`, `meeting_time`, `room_usage`
+
+### 2. User Activity
+* **Endpoint:** `/api/v1/analytics/users/:user_id/activity`
+* **Method:** `GET`
+* **Purpose:** Get individual user activity metrics
+
+---
+
+## General API Conventions
+
+### Authentication
+- All authenticated endpoints require `Authorization: Bearer <jwt_token>` header
+- WebSocket connections authenticate via `token` query parameter
+
+### Rate Limiting
+- Position updates: 10 requests per second
+- API calls: 100 requests per minute per user
+- File uploads: 5 per minute
+
+### Error Responses
+All errors follow this format:
+```json
+{
+    "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid position coordinates",
+        "details": {
+            "field": "position.x",
+            "value": -100,
+            "constraint": "must be non-negative"
+        }
+    }
+}
+```
+
+### WebRTC Configuration
+For voice/video features, the API provides WebRTC configuration:
+```json
+{
+    "ice_servers": [
+        {"urls": "stun:stun.uriel.com:3478"},
         {
-            "message": "POI created successfully",
-            "poi_id": "uuid-of-new-poi"
+            "urls": "turn:turn.uriel.com:3478",
+            "username": "turn_user",
+            "credential": "turn_password"
         }
-        ```
-      * **Response (Error - HTTP 400 Bad Request, 401 Unauthorized, 403 Forbidden):**
-        ```json
-        {
-            "error": "Insufficient permissions"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `poi.CreatePOI`
-
-2.  **Get POIs**
-
-      * **Endpoint:** `/api/v1/pois`
-      * **Method:** `GET`
-      * **Purpose:** Retrieves a list of Points of Interest. Can be filtered by type, proximity, etc.
-      * **Authentication:** Required (JWT).
-      * **Query Parameters (Optional):**
-          * `type`: Filter by POI type (e.g., `healing_station`, `quest_giver`).
-          * `center_lat`, `center_lon`, `radius_km`: For geospatial search.
-          * `limit`, `offset`: For pagination.
-      * **Response (Success - HTTP 200 OK):**
-        ```json
-        {
-            "pois": [
-                {
-                    "poi_id": "uuid-of-poi-1",
-                    "name": "Healing Spring",
-                    "type": "healing_station",
-                    "latitude": 34.0600,
-                    "longitude": -118.2500,
-                    "description": "A mystical spring that restores health.",
-                    "metadata": { /* ... */ }
-                },
-                {
-                    "poi_id": "uuid-of-poi-2",
-                    "name": "Dragon's Lair",
-                    "type": "boss_area",
-                    "latitude": 34.0700,
-                    "longitude": -118.2600,
-                    "description": "Beware the mighty beast!",
-                    "metadata": { /* ... */ }
-                }
-            ]
-        }
-        ```
-      * **Response (Error - HTTP 401 Unauthorized, 500 Internal Server Error):**
-        ```json
-        {
-            "error": "Authentication required"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `poi.GetPOIs`
-
-3.  **Get Single POI by ID**
-
-      * **Endpoint:** `/api/v1/pois/:poi_id`
-      * **Method:** `GET`
-      * **Purpose:** Retrieves detailed information for a specific POI.
-      * **Authentication:** Required (JWT).
-      * **Response (Success - HTTP 200 OK):**
-        ```json
-        {
-            "poi_id": "uuid-of-poi-1",
-            "name": "Healing Spring",
-            "type": "healing_station",
-            "latitude": 34.0600,
-            "longitude": -118.2500,
-            "description": "A mystical spring that restores health.",
-            "metadata": {
-                "heal_amount": 50,
-                "respawn_time_seconds": 300
-            },
-            "created_at": "2025-07-15T10:00:00Z",
-            "updated_at": "2025-07-16T14:00:00Z"
-        }
-        ```
-      * **Response (Error - HTTP 401 Unauthorized, 404 Not Found):**
-        ```json
-        {
-            "error": "POI not found"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `poi.GetPOIByID`
-
-4.  **Update POI**
-
-      * **Endpoint:** `/api/v1/pois/:poi_id`
-      * **Method:** `PUT` or `PATCH` (PUT for full replacement, PATCH for partial update).
-      * **Purpose:** Modifies an existing Point of Interest.
-      * **Authentication:** Required (JWT). **Authorization:** Must have `admin` or `game_master` role.
-      * **Request Body (JSON - similar to Create POI, but often with optional fields for PATCH):**
-        ```json
-        {
-            "description": "A powerful spring, now heals more!",
-            "metadata": {
-                "heal_amount": 75
-            }
-        }
-        ```
-      * **Response (Success - HTTP 200 OK):**
-        ```json
-        {
-            "message": "POI updated successfully",
-            "poi_id": "uuid-of-poi-1"
-        }
-        ```
-      * **Response (Error - HTTP 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found):**
-        ```json
-        {
-            "error": "POI not found or invalid data"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `poi.UpdatePOI`
-
-5.  **Delete POI**
-
-      * **Endpoint:** `/api/v1/pois/:poi_id`
-      * **Method:** `DELETE`
-      * **Purpose:** Removes a Point of Interest from the game world.
-      * **Authentication:** Required (JWT). **Authorization:** Must have `admin` or `game_master` role.
-      * **Response (Success - HTTP 204 No Content):** (No body, indicates successful deletion)
-      * **Response (Error - HTTP 401 Unauthorized, 403 Forbidden, 404 Not Found):**
-        ```json
-        {
-            "error": "POI not found or insufficient permissions"
-        }
-        ```
-      * **Gin Handler (Conceptual):** `poi.DeletePOI`
-
------
-
-## IV. Real-time Communication Endpoint
-
-This is not a traditional REST endpoint but the entry point for WebSocket connections.
-
-1.  **WebSocket Connection for Map Updates**
-      * **Endpoint:** `/ws/map-updates`
-      * **Method:** `GET` (HTTP Upgrade request)
-      * **Purpose:** Establishes a persistent bidirectional WebSocket connection for pushing real-time player location updates, and potentially new POI alerts, directly to connected clients.
-      * **Authentication:** Required (JWT). The JWT can be sent as a query parameter or via a custom header during the WebSocket handshake.
-      * **Messages Sent by Server (JSON):**
-        ```json
-        // Player location update
-        {
-            "type": "player_update",
-            "player_id": "uuid-of-player-A",
-            "username": "Alice",
-            "latitude": 34.0535,
-            "longitude": -118.2445,
-            "timestamp": "2025-07-16T14:30:10Z"
-        }
-        // New POI notification
-        {
-            "type": "poi_created",
-            "poi_id": "uuid-of-new-poi",
-            "name": "New Resource Node",
-            "latitude": 34.0550,
-            "longitude": -118.2460,
-            "poi_type": "resource_node"
-        }
-        ```
-      * **Messages Sent by Client (Optional):** Clients could send messages to request specific updates or indicate their current viewport for optimized data.
-        ```json
-        {
-            "type": "viewport_update",
-            "min_lat": 34.00,
-            "min_lon": -118.30,
-            "max_lat": 34.10,
-            "max_lon": -118.20
-        }
-        ```
-      * **Gin Handler (Conceptual):** `websocket.HandleMapUpdates` (This handler would upgrade the HTTP connection to a WebSocket and manage the client connection).
-
------
-
-### General Considerations for Implementation:
-
-  * **Versionining (`/v1`):** Using `/api/v1` in the URL path is a good practice for API versioning, allowing for future changes without breaking existing clients.
-  * **Error Handling:** Consistent error response structures (e.g., `{"error": "message"}`) and appropriate HTTP status codes are essential for robust client-side development.
-  * **Input Validation:** Every incoming request body and query parameter must be rigorously validated on the server-side (Gin's `ShouldBindJSON` helps, but further semantic validation is needed) to prevent invalid data or security vulnerabilities.
-  * **Rate Limiting:** The `PUT /api/v1/players/:player_id/location` endpoint, in particular, will receive frequent requests. Implementing rate limiting is crucial to prevent abuse and ensure server stability.
-  * **Security:** As discussed previously, JWT validation via Gin middleware will be applied to all authenticated routes. Role-based authorization will ensure that only authorized users can perform sensitive operations (e.g., POI creation/deletion).
+    ]
+}
+```

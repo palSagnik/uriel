@@ -115,7 +115,7 @@ func (repo *mongoAuthRepository) UpdateUserStatus(ctx context.Context, id string
 
 	filter := bson.M{"_id": objectId}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "is_online", Value: true}}}}
-	
+
 	_, err = repo.collection.UpdateOne(ctx, filter, update)
 	return err
 }

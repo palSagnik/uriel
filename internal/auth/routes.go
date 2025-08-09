@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func RegisterRoutes(router *gin.RouterGroup, handler *Handler) {
 	auth := router.Group("/auth")
 	{
@@ -12,4 +11,3 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler) {
 		auth.POST("/login", handler.LoginUser)
 	}
 }
-

@@ -18,13 +18,13 @@ import (
 )
 
 type Service struct {
-	repo AuthRepository
+	repo         AuthRepository
 	jwtSecretKey []byte
 }
 
 func NewService(repo AuthRepository, jwtSecretKey []byte) *Service {
 	return &Service{
-		repo: repo,
+		repo:         repo,
 		jwtSecretKey: jwtSecretKey,
 	}
 }
@@ -41,7 +41,7 @@ func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterR
 	}
 
 	// check if this email already exists
-	existingUserByEmail, err := s.repo.GetUserByEmail(ctx, req.Email)
+  existingUserByEmail, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("service: error checking existing email %v", err)
 	}
@@ -56,23 +56,22 @@ func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterR
 		return nil, fmt.Errorf("service: error hashing password %v", err)
 	}
 
-	// create player
+	// create user
 	// TODO: Errors should be ENUMS
-	newUser := models.User{
-		ID: primitive.NewObjectID(),
-		Username: req.Username,
-		Email: req.Email,
-		Password: string(hashedPassword),
-		Role: config.USER,
-		IsOnline: false,
+newuser := models.User{
+		ID:        primitive.NewObjectID(),
+		Username:  req.Username,
+		Email:     req.Email,
+		Password:  string(hashedPassword),
+		Role:      config.USER,
+		IsOnline:  false,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
 
-	if err := s.repo.CreateUser(ctx, newUser); err != nil {
+if err := s.repo.CreateUser(ctx, newUser); err != nil {
 		return nil, fmt.Errorf("service: error in creating new user %v", err)
 	}
-
 	return &newUser, nil
 }
 
@@ -84,7 +83,7 @@ func (s *Service) LoginUserService(ctx context.Context, username string, passwor
 		if err == mongo.ErrNoDocuments {
 			return "", "", errors.New("invalid username or password")
 		}
-		return "", "", fmt.Errorf("service: error retrieving player %v", err)
+		return "", "", fmt.Errorf("service: error retrieving user %v", err)
 	}
 	if user == nil {
 		return "", "", errors.New("invalid username or password")
@@ -111,14 +110,14 @@ func (s *Service) LoginUserService(ctx context.Context, username string, passwor
 
 func (s *Service) GenerateToken(userId, username, role string) (string, error) {
 	claims := models.Claims{
-		UserID: userId,
+    UserID: userId,
 		Username: username,
-		Role: role,
-		RegisteredClaims: jwt.RegisteredClaims {
+		Role:     role,
+		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * config.TOKEN_DURATION)),
-			IssuedAt: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer: "uriel",
+			Issuer:    "uriel",
 		},
 	}
 
@@ -141,11 +140,11 @@ func (s *Service) ValidateToken(tokenString string) (*models.Claims, error) {
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenMalformed) {
-            return nil, errors.New("token is malformed")
-        } else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
-            return nil, errors.New("token has expired or is not yet valid")
-        }
-        return nil, fmt.Errorf("token parsing failed: %w", err)
+			return nil, errors.New("token is malformed")
+		} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
+			return nil, errors.New("token has expired or is not yet valid")
+		}
+		return nil, fmt.Errorf("token parsing failed: %w", err)
 	}
 
 	claims, ok := token.Claims.(*models.Claims)
@@ -167,7 +166,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		
+
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid authorisation header",
@@ -188,7 +187,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("playerID", claims.UserID)
+    c.Set("userID", claims.UserID)
 		c.Set("username", claims.Username)
 
 		c.Next()

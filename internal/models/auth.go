@@ -13,7 +13,7 @@ type RegisterRequest struct {
 
 type RegisterResponse struct {
 	Message string `json:"message"`
-	UserID  string `json:"player_id"`
+	UserID  string `json:"user_id"`
 }
 
 type FailedResponse struct {
@@ -28,7 +28,7 @@ type LoginRequest struct {
 type LoginResponse struct {
 	Message string `json:"message"`
 	Token   string `json:"token"`
-	UserID  string `json:"player_id"`
+  UserID  string `json:"user_id"`
 }
 
 

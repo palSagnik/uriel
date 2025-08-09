@@ -37,6 +37,7 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 	defer cancel()
 
 	newUser, err := h.service.RegisterUserService(ctx, req)
+
 	if err != nil {
 		if err.Error() == "email already exists" || err.Error() == "username already exists" {
 			c.JSON(http.StatusConflict, models.FailedResponse{
@@ -44,6 +45,7 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 			})
 			return
 		}
+    
 		c.JSON(http.StatusInternalServerError, models.FailedResponse{
 			Error: "Failed to register user",
 		})
@@ -51,6 +53,7 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, models.RegisterResponse{
+
 		Message: "User registered succesfully",
 		UserID:  newUser.ID.Hex(),
 	})
@@ -86,7 +89,7 @@ func (h *Handler) LoginUser(c *gin.Context) {
 	c.Header("Authorization", authHeader)
 
 	c.JSON(http.StatusOK, models.LoginResponse{
-		Message: "User login successful",
+    Message: "User login successful",
 		Token:   token,
 		UserID:  userId,
 	})

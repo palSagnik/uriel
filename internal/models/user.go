@@ -12,7 +12,7 @@ type User struct {
 	Username  string             `bson:"username"`
 	Password  string             `bson:"password"`
 	Role      string             `bson:"role"`
-	AvatarUrl string             `bson:"avatar_url"`
+  AvatarUrl string             `bson:"avatar_url"`
 	IsOnline  bool               `bson:"is_online"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
