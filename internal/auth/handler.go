@@ -18,7 +18,7 @@ func NewHandler(authService *Service) *Handler {
 	return &Handler{service: authService}
 }
 
-// RegisterPlayer is a Gin handler for player registration.
+// RegisterUser is a Gin handler for User registration.
 // It works between the HTTP request and the AuthService.
 func (h *Handler) RegisterUser(c *gin.Context) {
 	var req *models.RegisterRequest
@@ -39,12 +39,12 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 	newUser, err := h.service.RegisterUserService(ctx, req)
 	if err != nil {
 		if err.Error() == "email already exists" || err.Error() == "username already exists" {
-			c.JSON(http.StatusConflict, models.RegisterResponseFailed{
+			c.JSON(http.StatusConflict, models.FailedResponse{
 				Error: err.Error(),
 			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.RegisterResponseFailed{
+		c.JSON(http.StatusInternalServerError, models.FailedResponse{
 			Error: "Failed to register user",
 		})
 		return
@@ -70,10 +70,14 @@ func (h *Handler) LoginUser(c *gin.Context) {
 	token, userId, err := h.service.LoginUserService(ctx, req.Username, req.Password)
 	if err != nil {
 		if err.Error() == "invalid username or password" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnauthorized, models.FailedResponse{
+				Error: err.Error(),
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Login failed due to internal server error"})
+		c.JSON(http.StatusInternalServerError, models.FailedResponse{
+			Error: "Login failed due to internal server error",
+		})
 		return
 	}
 
@@ -82,7 +86,7 @@ func (h *Handler) LoginUser(c *gin.Context) {
 	c.Header("Authorization", authHeader)
 
 	c.JSON(http.StatusOK, models.LoginResponse{
-		Message: "Player login successful",
+		Message: "User login successful",
 		Token:   token,
 		UserID:  userId,
 	})

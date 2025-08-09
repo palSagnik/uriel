@@ -39,6 +39,7 @@ func (m *MockAuthRepository) GetUserByEmail(ctx context.Context, email string) (
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
+// TODO: Mocks of this
 // GetUserById(ctx context.Context, id string) (*models.User, error)
 func (m *MockAuthRepository) GetUserById(ctx context.Context, id string) (*models.User, error) {
 	return nil, nil

@@ -16,7 +16,7 @@ type RegisterResponse struct {
 	UserID  string `json:"player_id"`
 }
 
-type RegisterResponseFailed struct {
+type FailedResponse struct {
 	Error string `json:"message"`
 }
 
@@ -30,6 +30,7 @@ type LoginResponse struct {
 	Token   string `json:"token"`
 	UserID  string `json:"player_id"`
 }
+
 
 type Claims struct {
 	UserID   string
