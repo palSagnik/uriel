@@ -16,6 +16,10 @@ type RegisterResponse struct {
 	UserID  string `json:"player_id"`
 }
 
+type RegisterResponseFailed struct {
+	Error string `json:"message"`
+}
+
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`

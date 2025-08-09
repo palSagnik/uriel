@@ -39,16 +39,20 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 	newUser, err := h.service.RegisterUserService(ctx, req)
 	if err != nil {
 		if err.Error() == "email already exists" || err.Error() == "username already exists" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusConflict, models.RegisterResponseFailed{
+				Error: err.Error(),
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
+		c.JSON(http.StatusInternalServerError, models.RegisterResponseFailed{
+			Error: "Failed to register user",
+		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, models.RegisterResponse{
 		Message: "User registered succesfully",
-		UserID: newUser.ID.Hex(),
+		UserID:  newUser.ID.Hex(),
 	})
 }
 
@@ -79,7 +83,7 @@ func (h *Handler) LoginUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Message: "Player login successful",
-		Token: token,
-		UserID: userId,
+		Token:   token,
+		UserID:  userId,
 	})
 }
