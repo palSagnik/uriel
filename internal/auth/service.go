@@ -58,7 +58,7 @@ func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterR
 
 	// create user
 	// TODO: Errors should be ENUMS
-newuser := models.User{
+	newUser := models.User{
 		ID:        primitive.NewObjectID(),
 		Username:  req.Username,
 		Email:     req.Email,
