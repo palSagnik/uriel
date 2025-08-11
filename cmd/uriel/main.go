@@ -25,7 +25,7 @@ func main() {
 
 	// --- Initialise Repositories ---
 	authRepo := database.NewAuthRepository(mongodb)
-	userRepo := database.NewuserRepository(mongodb)
+	userRepo := database.NewUserRepository(mongodb)
 
 	// --- Initialise Services ---
 	authService := auth.NewService(authRepo, []byte(cfg.JWTSecret))
