@@ -18,7 +18,6 @@ type User struct {
 	UpdatedAt time.Time          `bson:"updated_at,omitempty"`
 }
 
-type UpdateMetadataRequest struct {
-	UserId   string `json:"user_id"`
+type UpdateAvatarRequest struct {
 	AvatarId string `json:"avatar_id"`
 }

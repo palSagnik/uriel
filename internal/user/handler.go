@@ -1,12 +1,12 @@
 package user
 
 import (
-"context"
-"net/http"
-"time"
+	"context"
+	"net/http"
+	"time"
 
-"github.com/gin-gonic/gin"
-"github.com/palSagnik/uriel/internal/models"
+	"github.com/gin-gonic/gin"
+	"github.com/palSagnik/uriel/internal/models"
 )
 
 type Handler struct {
@@ -23,8 +23,15 @@ func (h *Handler) GetUserLocations(c *gin.Context) {
 	})
 }
 
-func (h *Handler) UpdateMetadata(c *gin.Context) {
-	var req *models.UpdateMetadataRequest
+func (h *Handler) UpdateAvatar(c *gin.Context) {
+	// retrieve the userId
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Please login"})
+		return
+	}
+	
+	var req *models.UpdateAvatarRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -34,12 +41,13 @@ func (h *Handler) UpdateMetadata(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 10*time.Second)
 	defer cancel()
 
-	if msg, err := h.service.UpdateMetadata(ctx, req.UserId, req.AvatarId); err != nil {
+	msg, err := h.service.UpdateAvatar(ctx, userID.(string), req.AvatarId); 
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "avatar_url updated successfully",
+		"message": msg,
 	})
 }

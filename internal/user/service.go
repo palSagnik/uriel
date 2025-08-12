@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/palSagnik/uriel/internal/avatar"
 )
@@ -19,12 +18,15 @@ func NewService(userRepo UserRepository, avatarRepo avatar.AvatarRepository) *Se
 	}
 }
 
-func (s *Service) UpdateMetadata(ctx context.Context, userId string, avatarId string) (string, error) {
+func (s *Service) UpdateAvatar(ctx context.Context, userId string, avatarId string) (string, error) {
 	avatarUrl, err := s.avatarRepo.GetAvatarUrlById(ctx, avatarId)
 	if err != nil {
-		return fmt.Sprintf("failed to get avatar url"), err
+		return "failed to get avatar url", err
 	}
 
+	if err := s.userRepo.UpdateAvatar(ctx, userId, avatarUrl); err != nil {
+		return "failed to update avatar", err
+	}
 
-	return "", nil
+	return "updated avatar succesfully", nil
 }
