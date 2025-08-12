@@ -1,7 +1,13 @@
 package user
 
-import "context"
+import (
+	"context"
+
+	"github.com/palSagnik/uriel/internal/models"
+)
 
 type UserRepository interface {
+  GetUsers(ctx context.Context) ([]models.User, error)
   GetUserLocations(ctx context.Context) error
+  UpdateMetadata(ctx context.Context, id string, avatarUrl string) error
 }

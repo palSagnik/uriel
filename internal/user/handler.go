@@ -34,7 +34,7 @@ func (h *Handler) UpdateMetadata(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 10*time.Second)
 	defer cancel()
 
-	if msg, err := h.service.UpdateMetadata(ctx, req.AvatarUrl); err != nil {
+	if msg, err := h.service.UpdateMetadata(ctx, req.UserId, req.AvatarId); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 		return
 	}

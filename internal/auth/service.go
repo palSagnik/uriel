@@ -65,6 +65,7 @@ func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterR
 		Password:  string(hashedPassword),
 		Role:      config.USER,
 		IsOnline:  false,
+		AvatarUrl: "",
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}

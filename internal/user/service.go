@@ -1,17 +1,30 @@
 package user
 
-import "context"
+import (
+	"context"
+	"fmt"
+
+	"github.com/palSagnik/uriel/internal/avatar"
+)
 
 type Service struct {
-	repo UserRepository
+	userRepo   UserRepository
+	avatarRepo avatar.AvatarRepository
 }
 
-func NewService(repo UserRepository) *Service {
+func NewService(userRepo UserRepository, avatarRepo avatar.AvatarRepository) *Service {
 	return &Service{
-		repo: repo,
+		userRepo:   userRepo,
+		avatarRepo: avatarRepo,
 	}
 }
 
-func (s *Service) UpdateMetadata(ctx context.Context, avatarUrl string) (string, error) {
+func (s *Service) UpdateMetadata(ctx context.Context, userId string, avatarId string) (string, error) {
+	avatarUrl, err := s.avatarRepo.GetAvatarUrlById(ctx, avatarId)
+	if err != nil {
+		return fmt.Sprintf("failed to get avatar url"), err
+	}
+
+
 	return "", nil
 }
