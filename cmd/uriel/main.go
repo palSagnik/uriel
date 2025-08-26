@@ -26,10 +26,11 @@ func main() {
 	// --- Initialise Repositories ---
 	authRepo := database.NewAuthRepository(mongodb)
 	userRepo := database.NewUserRepository(mongodb)
+	avatarRepo := database.NewAvatarRepository(mongodb)
 
 	// --- Initialise Services ---
 	authService := auth.NewService(authRepo, []byte(cfg.JWTSecret))
-	userService := user.NewService(userRepo)
+	userService := user.NewService(userRepo, avatarRepo)
 
 	// --- Initialise Handlers ---
 	authHandler := auth.NewHandler(authService)
