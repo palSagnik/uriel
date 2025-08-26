@@ -41,7 +41,7 @@ func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterR
 	}
 
 	// check if this email already exists
-  existingUserByEmail, err := s.repo.GetUserByEmail(ctx, req.Email)
+	existingUserByEmail, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil && err != mongo.ErrNoDocuments {
 		return nil, fmt.Errorf("service: error checking existing email %v", err)
 	}
@@ -65,11 +65,12 @@ func (s *Service) RegisterUserService(ctx context.Context, req *models.RegisterR
 		Password:  string(hashedPassword),
 		Role:      config.USER,
 		IsOnline:  false,
+		AvatarUrl: "",
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
 
-if err := s.repo.CreateUser(ctx, newUser); err != nil {
+	if err := s.repo.CreateUser(ctx, newUser); err != nil {
 		return nil, fmt.Errorf("service: error in creating new user %v", err)
 	}
 	return &newUser, nil
@@ -91,7 +92,7 @@ func (s *Service) LoginUserService(ctx context.Context, username string, passwor
 
 	// compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", "", errors.New("invalid username or password") 
+		return "", "", errors.New("invalid username or password")
 	}
 
 	// update user online status
@@ -110,7 +111,7 @@ func (s *Service) LoginUserService(ctx context.Context, username string, passwor
 
 func (s *Service) GenerateToken(userId, username, role string) (string, error) {
 	claims := models.Claims{
-    UserID: userId,
+		UserID:   userId,
 		Username: username,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -187,7 +188,7 @@ func (s *Service) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-    c.Set("userID", claims.UserID)
+		c.Set("userID", claims.UserID)
 		c.Set("username", claims.Username)
 
 		c.Next()

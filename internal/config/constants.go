@@ -11,3 +11,4 @@ const GUEST = "guest"
 // DATABASE
 const DATABASE_NAME = "urieldb"
 const USER_COLLECTION = "user"
+const AVATAR_COLLECTION = "avatar"
