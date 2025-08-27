@@ -7,5 +7,6 @@ func RegisterRoutes(router *gin.RouterGroup, handler *Handler, middleware gin.Ha
 	{
 		users.POST("/avatar", middleware, handler.UpdateUserAvatar)
 		users.GET("/avatar", middleware, handler.GetAllAvatars)
+		users.GET("/user", middleware, handler.GetAllUsers)
 	}
 }

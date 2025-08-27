@@ -40,3 +40,12 @@ func (s *Service) GetAvatars(ctx context.Context) ([]models.Avatar, error) {
 
 	return avatars, nil
 }
+
+func (s *Service) GetUsers(ctx context.Context) ([]models.User, error) {
+	users, err := s.userRepo.GetUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

@@ -46,6 +46,21 @@ func (h *Handler) UpdateUserAvatar(c *gin.Context) {
 	})
 }
 
+func (h *Handler) GetAllUsers(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 10*time.Second)
+	defer cancel()
+
+	users, err := h.service.GetUsers(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+	})
+}
+
 func (h *Handler) GetAllAvatars(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 10*time.Second)
 	defer cancel()
