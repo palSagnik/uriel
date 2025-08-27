@@ -21,7 +21,7 @@ func NewUserRepository(mongo *MongoDB) user.UserRepository {
 	return &mongoUserRepository{collection: userCollection}
 }
 
-func (repo *mongoUserRepository) UpdateAvatar(ctx context.Context, userId string, avatarUrl string) error {
+func (repo *mongoUserRepository) UpdateUserAvatar(ctx context.Context, userId string, avatarUrl string) error {
 	userObjectId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
 		return err
@@ -32,10 +32,6 @@ func (repo *mongoUserRepository) UpdateAvatar(ctx context.Context, userId string
 
 	_, err = repo.collection.UpdateOne(ctx, filterUser, updateUser)
 	return err
-}
-
-func (repo *mongoUserRepository) GetUserLocations(ctx context.Context) error {
-	return nil
 }
 
 func (repo *mongoUserRepository) GetUsers(ctx context.Context) ([]models.User, error) {
