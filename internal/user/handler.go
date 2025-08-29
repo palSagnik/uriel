@@ -67,11 +67,11 @@ func (h *Handler) GetAllAvatars(c *gin.Context) {
 
 	avatars, err := h.service.GetAvatars(ctx)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"avatars": avatars,
+	c.JSON(http.StatusOK, models.GetAvatarsResponse{
+		Avatars: avatars,
 	})
 }

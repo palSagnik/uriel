@@ -40,7 +40,7 @@ func (m *MockAvatarRepository) GetAvatarUrlById(ctx context.Context, id string) 
 		return "", args.Error(1)
 	}
 
-	return args.Get(0).(string), args.Error(1)
+	return args.String(0), args.Error(1)
 }
 
 // GetAvatars(ctx context.Context) ([]models.Avatar, error)

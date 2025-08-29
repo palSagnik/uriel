@@ -28,9 +28,8 @@ type LoginRequest struct {
 type LoginResponse struct {
 	Message string `json:"message"`
 	Token   string `json:"token"`
-  UserID  string `json:"user_id"`
+	UserID  string `json:"user_id"`
 }
-
 
 type Claims struct {
 	UserID   string

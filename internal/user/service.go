@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	"github.com/palSagnik/uriel/internal/avatar"
 	"github.com/palSagnik/uriel/internal/models"
@@ -35,7 +36,7 @@ func (s *Service) UpdateUserAvatar(ctx context.Context, userId string, avatarId 
 func (s *Service) GetAvatars(ctx context.Context) ([]models.Avatar, error) {
 	avatars, err := s.avatarRepo.GetAvatars(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to get avatars")
 	}
 
 	return avatars, nil
