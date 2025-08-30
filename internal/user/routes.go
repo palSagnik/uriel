@@ -5,7 +5,8 @@ import "github.com/gin-gonic/gin"
 func RegisterRoutes(router *gin.RouterGroup, handler *Handler, middleware gin.HandlerFunc) {
 	users := router.Group("/users")
 	{
-		users.GET("/locations", middleware, handler.GetUserLocations)
-		users.POST("/avatar", middleware, handler.UpdateAvatar)
+		users.POST("/avatar", middleware, handler.UpdateUserAvatar)
+		users.GET("/avatar", middleware, handler.GetAllAvatars)
+		users.GET("/user", middleware, handler.GetAllUsers)
 	}
 }
