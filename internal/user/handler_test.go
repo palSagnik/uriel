@@ -125,3 +125,37 @@ func TestUpdateUserAvatar_Success(t *testing.T) {
 	mockAvatarRepo.AssertExpectations(t)
 	mockUserRepo.AssertExpectations(t)
 }
+
+func TestUpdateUserAvatar_Failure(t *testing.T) {
+	mockUserRepo := new(MockUserRepository)
+	mockAvatarRepo := new(MockAvatarRepository)
+
+	mockAvatarRepo.On("GetAvatarUrlById", mock.Anything, "test-avatarId-123").Return("http://testavatar.com", nil)
+	mockUserRepo.On("UpdateUserAvatar", mock.Anything, "user-player-id-123", "http://testavatar.com").Return(errors.New("internal database error"))
+
+	service := NewService(mockUserRepo, mockAvatarRepo)
+	handler := NewHandler(service)
+
+	router := gin.New()
+	router.POST("/users/avatar", mockAuthMiddleware(), handler.UpdateUserAvatar)
+
+	payload := models.UpdateUserAvatarRequest{
+		AvatarId: "test-avatarId-123",
+	}
+	jsonPayload, _ := json.Marshal(payload)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPost, "/users/avatar", bytes.NewBuffer(jsonPayload))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	var res map[string]string
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+
+	assert.Equal(t, "failed to update avatar", res["error"])
+
+	mockAvatarRepo.AssertExpectations(t)
+	mockUserRepo.AssertExpectations(t)
+}
