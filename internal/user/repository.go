@@ -8,6 +8,5 @@ import (
 
 type UserRepository interface {
 	GetUsers(ctx context.Context) ([]models.User, error)
-	GetUserLocations(ctx context.Context) error
-	UpdateAvatar(ctx context.Context, id string, avatarUrl string) error
+	UpdateUserAvatar(ctx context.Context, id string, avatarUrl string) error
 }

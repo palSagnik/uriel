@@ -39,3 +39,19 @@ func (repo *mongoAvatarRepository) GetAvatarUrlById(ctx context.Context, id stri
 
 	return avatar.AvatarUrl, nil
 }
+
+func (repo *mongoAvatarRepository) GetAvatars(ctx context.Context) ([]models.Avatar, error) {
+	var avatars []models.Avatar
+
+	cursor, err := repo.collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, errors.New("avatar list not found")
+	}
+	defer cursor.Close(ctx)
+
+	if err := cursor.All(ctx, &avatars); err != nil {
+		return nil, fmt.Errorf("failed to decode cursor: %w", err)
+	}
+
+	return avatars, nil
+}
